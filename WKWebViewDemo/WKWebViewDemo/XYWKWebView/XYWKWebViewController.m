@@ -8,19 +8,6 @@
 //  Copyright © 2018年 xiaoyouPrince. All rights reserved.
 //
 
-#define XYWKScreenW [UIScreen mainScreen].bounds.size.width
-#define XYWKScreenH [UIScreen mainScreen].bounds.size.height
-#define XYWKiPhoneX (XYWKScreenH == 812) // iPhone X height
-#define XYWKNavHeight (XYWKiPhoneX ? (88.f) : (64.f))  // statusBarH + TopBarH
-
-#ifdef DEBUG
-#define XYWKLog(...) NSLog( @"< %s:(第%d行) > %@",__func__ , __LINE__, [NSString stringWithFormat:__VA_ARGS__] )
-#define XYWKFunc DLog(@"");
-#else
-#define XYWKLog( s, ... )
-#define XYWKFunc;
-#endif
-
 #import "XYWKWebViewController.h"
 #import "XYWKTool.h"
 
@@ -100,7 +87,7 @@
 }
 
 - (void)dealloc {
-    NSLog(@"dealloc --- %@",NSStringFromClass([self class]));
+    XYWKLog(@"dealloc --- %@",NSStringFromClass([self class]));
     if (self.shouldShowProgress) {
         [self.webView removeObserver:self forKeyPath:@"estimatedProgress"];
     }
@@ -221,7 +208,7 @@
 
 - (void)xy_webView:(XYWKWebView *)webView didReceiveScriptMessage:(XYScriptMessage *)message
 {
-    NSLog(@"webView method:%@",message.method);
+    XYWKLog(@"webView method:%@",message.method);
     
     //返回上一页
     if ([message.method isEqualToString:@"tobackpage"]) {
@@ -254,7 +241,7 @@
         [self showHUD];
     }
     
-    NSLog(@"%s：%@", __FUNCTION__,webView.URL);
+    XYWKLog(@"%s：%@", __FUNCTION__,webView.URL);
 }
 
 /**
@@ -265,7 +252,7 @@
  */
 - (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation {
     
-    NSLog(@"%s", __FUNCTION__);
+    XYWKLog(@"%s", __FUNCTION__);
 }
 
 /**
@@ -279,7 +266,7 @@
     [self hideHUD];
     
     // 实际上是首页加载完成之后就会走这个方法
-    NSLog(@"%s 这个页面加载完成了",__func__);
+    XYWKLog(@"%s 这个页面加载完成了",__func__);
     
 }
 
@@ -292,7 +279,7 @@
  */
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
     
-    NSLog(@"%s%@", __FUNCTION__,error);
+    XYWKLog(@"%s%@", __FUNCTION__,error);
 #warning TODO -- should hide loading Progress
 #warning TODO -- should hide HUD
     [self hideLoadingProgressView];
@@ -307,7 +294,7 @@
  */
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation {
     
-    NSLog(@"%s", __FUNCTION__);
+    XYWKLog(@"%s", __FUNCTION__);
     // 这里进行重定向了，例如 网页内下载APP 链接，起初是https://地址。重定向之后itms-appss:// 这里需要重新让WebView加载一下
     NSString *redirectionUrlScheme = webView.URL.scheme;
     if ([redirectionUrlScheme isEqualToString:@"itms-appss"]) {
@@ -324,7 +311,7 @@
  */
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler {
     
-    NSLog(@"%s", __FUNCTION__);
+    XYWKLog(@"%s", __FUNCTION__);
     
     decisionHandler(WKNavigationResponsePolicyAllow);
 }
@@ -338,10 +325,10 @@
  */
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     
-    NSLog(@"URL: %@", navigationAction.request.URL.absoluteString);
+    XYWKLog(@"URL: %@", navigationAction.request.URL.absoluteString);
     
     NSString *urlStr = navigationAction.request.URL.absoluteString;
-    NSLog(@"urlStr.lastPathComponent = %@",urlStr.lastPathComponent);
+    XYWKLog(@"urlStr.lastPathComponent = %@",urlStr.lastPathComponent);
     
     if (!navigationAction.targetFrame.isMainFrame) {
         

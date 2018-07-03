@@ -170,7 +170,7 @@
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
     
-    NSLog(@"message:%@",message.body);
+    XYWKLog(@"message:%@",message.body);
     if ([message.body isKindOfClass:[NSDictionary class]]) {
         
         NSDictionary *body = (NSDictionary *)message.body;
@@ -193,7 +193,7 @@
 
 - (void)callJS:(NSString *)jsMethod handler:(void (^)(id _Nullable))handler {
     
-    NSLog(@"call js:%@",jsMethod);
+    XYWKLog(@"call js:%@",jsMethod);
     [self evaluateJavaScript:jsMethod completionHandler:^(id _Nullable response, NSError * _Nullable error) {
         if (handler) {
             handler(response);
