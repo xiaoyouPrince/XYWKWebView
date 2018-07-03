@@ -139,8 +139,7 @@ XYWKWebView 核心功能
     
     NSMutableArray* pairs = [NSMutableArray array];
 
-  //可以在这里将token参数添加进去，这样就可以实现第6点功能    
-
+    //可以在这里将token参数添加进去，这样就可以实现补全token功能    
     for (NSString* key in param.keyEnumerator) {
         NSString *value = [NSString stringWithFormat:@"%@",[param objectForKey:key]];
 
@@ -192,11 +191,12 @@ if (self.isUseWebPageTitle) {
 
 设置title 和 progressView 直接是自己简单写了一个 View 
 
-```- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+```
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     if ([keyPath isEqualToString:@"estimatedProgress"]) {
         
         if (object == self.webView) {
-            [self.navigationController setSGProgressPercentage:self.webView.estimatedProgress*100 andTintColor:[UIColor colorWithRed:24/255.0 green:124/255.0 blue:244/255.0f alpha:1.0]];
+            [self showLoadingProgress:self.webView.estimatedProgress andTintColor:[UIColor colorWithRed:24/255.0 green:124/255.0 blue:244/255.0f alpha:1.0]];
         }
         else{
             [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -229,8 +229,9 @@ if (self.isUseWebPageTitle) {
     
         if (configuration) {
         
-        Adds a script message handler.
-Adding a script message handler with name name causes the JavaScript function window.webkit.messageHandlers.name.postMessage(messageBody) to be defined in all frames in all web views that use the user content controller.
+            //文档中说
+            //Adds a script message handler.
+            //Adding a script message handler with name name causes the JavaScript function window.webkit.messageHandlers.name.postMessage(messageBody) to be defined in all frames in all web views that use the user content controller.
         
             // 这里就是设置 网页中 JS Message handler
             // 通过 “name” 注册之后，JS 内部函数 window.webkit.messageHandlers.“name”.postMessage(messageBody) 就被定义到整个用户的Web内容的控制器中。
@@ -445,6 +446,7 @@ HTML 中超链接，需要打开新页面的["_blank"处理](https://www.jianshu
 
 WebKit 的小封装能实现目前所需功能，但很多内容还需要在需要的时候去探究，希望能帮到同样学习的小伙伴。
 
+如果看完有收获，不妨点个✨，让我也更有分享的动力！
 
 
 
