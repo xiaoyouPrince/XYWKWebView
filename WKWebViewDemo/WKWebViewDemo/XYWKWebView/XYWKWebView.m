@@ -30,10 +30,6 @@
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
         
-        if (configuration) {
-            [configuration.userContentController addScriptMessageHandler:self name:@"webViewApp"];
-        }
-        
         //默认允许系统自带的侧滑后退
         self.allowsBackForwardNavigationGestures = YES;
         self.baseUrl = [NSURL URLWithString:BASE_URL_API];
@@ -119,6 +115,15 @@
     
     self.webViewRequestUrl = baseURL;
     self.webViewRequestParams = params;
+    
+    return [NSURL URLWithString:baseURL];
+    
+    
+    ///// 下面代码有待改进
+//    http://39.107.94.38:8001/dist/index.html#/?usertype=1&usercode=wr&pwd=F_F%2B%2B--S4f39064d6853af39661ed33b55dee150    ok
+//    http://39.107.94.38:8001/dist/index.html%23/?usertype=1&usercode=wr&pwd=F_F%252B%252B--S4f39064d6853af39661ed33b55dee150&
+    
+    
     
     NSMutableDictionary *param = [NSMutableDictionary dictionaryWithDictionary:params];
     

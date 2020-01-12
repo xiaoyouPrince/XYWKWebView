@@ -16,6 +16,11 @@
 
 @property (nonatomic, strong) XYWKWebView *webView;
 @property (nonatomic, copy) NSString *url;
+/**
+ * JS & App 协议的交互名称
+ * 用于子类化自由设置,默认 @“webViewApp”
+ */
+@property (nonatomic, copy) NSString * webViewAppName;
 
 #pragma mark -- navigation
 
@@ -45,5 +50,10 @@
  *  是否支持滚动（默认YES）
  */
 @property (nonatomic, assign) BOOL scrollEnabled;
+
+/**
+ *  是否使用web页面导航栏(默认NO)
+ */
+@property (nonatomic, assign) BOOL useWebNavigationBar;
 
 @end

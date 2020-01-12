@@ -25,11 +25,13 @@
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        _webViewAppName = @"webViewApp";
         _showHudWhenLoading = YES;
         _shouldShowProgress = YES;
         _isUseWebPageTitle = YES;
         _alwaysAllowSideBackGesture = YES;
         _scrollEnabled = YES;
+        _useWebNavigationBar = NO;
     }
     
     return self;
@@ -39,7 +41,8 @@
 {
     // 直接自定义WebView为self.view
     WKWebViewConfiguration *config = [WKWebViewConfiguration new];
-    _webView = [[XYWKWebView alloc]initWithFrame:CGRectZero configuration:config];
+    _webView = [[XYWKWebView alloc] initWithFrame:CGRectZero configuration:config];
+    [config.userContentController addScriptMessageHandler:_webView name:_webViewAppName];
     _webView.scrollView.scrollEnabled = _scrollEnabled;
     _webView.xy_messageHandlerDelegate = self;
     _webView.navigationDelegate = self;
@@ -64,6 +67,16 @@
     if (self.url.length) {
         [self.webView loadRequestWithRelativeUrl:self.url];
     }
+    
+    if (self.useWebNavigationBar) {
+        [self.navigationController setNavigationBarHidden:YES animated:YES];
+    }else
+    {
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"backIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(backAction)];
+        
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(closeAction)];
+    }
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -202,6 +215,22 @@
     else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+#pragma mark - backActions
+- (void)backAction
+{
+    if (self.webView.canGoBack) {
+        [self.webView goBack];
+    }else
+    {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+
+- (void)closeAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - SHWKWebViewMessageHandleDelegate

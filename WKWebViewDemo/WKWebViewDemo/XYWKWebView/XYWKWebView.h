@@ -10,7 +10,7 @@
 
 #define XYWKScreenW [UIScreen mainScreen].bounds.size.width
 #define XYWKScreenH [UIScreen mainScreen].bounds.size.height
-#define XYWKiPhoneX (XYWKScreenH == 812) // iPhone X height
+#define XYWKiPhoneX (XYWKScreenH >= 812) // iPhone X height
 #define XYWKNavHeight (XYWKiPhoneX ? (88.f) : (64.f))  // statusBarH + TopBarH
 
 #ifdef DEBUG
@@ -61,7 +61,7 @@
 
  @param footerJS 底部的功能部分JS代码
  */
-- (void)loadLocalHTML:(NSString *)htmlName withAddingStyleJS:(NSString *)styleJS funcJS:(NSString *)funcJS FooterJS:(NSString *)footerJS;
+- (void)loadLocalHTML:(nonnull NSString *)htmlName withAddingStyleJS:(nullable NSString *)styleJS funcJS:(nullable NSString *)funcJS FooterJS:(nullable NSString *)footerJS;
 
 #pragma mark - View Method
 
