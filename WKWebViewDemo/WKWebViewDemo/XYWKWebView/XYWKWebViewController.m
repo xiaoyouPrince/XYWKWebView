@@ -16,9 +16,15 @@
 @property(nonatomic , strong) UIView  *HUD;
 @property(nonatomic , strong) UIProgressView  *progressView;
 
+/**
+ * 微信H5支付的重定向地址
+ */
+@property (nonatomic, copy) NSString * wx_redirect_url;
+
 @end
 
 @implementation XYWKWebViewController
+@synthesize webViewAppName=_webViewAppName;
 
 #pragma mark - Life Circle
 
@@ -72,7 +78,7 @@
         [self.navigationController setNavigationBarHidden:YES animated:YES];
     }else
     {
-        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"backIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(backAction)];
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"wk_backIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(backAction)];
         
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(closeAction)];
     }
@@ -233,7 +239,7 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-#pragma mark - SHWKWebViewMessageHandleDelegate
+#pragma mark - XYWKWebViewMessageHandleDelegate
 
 - (void)xy_webView:(XYWKWebView *)webView didReceiveScriptMessage:(XYScriptMessage *)message
 {
@@ -309,10 +315,11 @@
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
     
     XYWKLog(@"%s%@", __FUNCTION__,error);
-#warning TODO -- should hide loading Progress
-#warning TODO -- should hide HUD
     [self hideLoadingProgressView];
     [self hideHUD];
+    
+    // 当scheme为非 http(s)会引发错误
+    // Error Domain= Code=0 "Redirection to URL with a scheme that is not HTTP(S)" UserInfo={_WKRecoveryAttempterErrorKey=<WKReloadFrameErrorRecoveryAttempter: 0x2835822a0>, NSErrorFailingURLStringKey=itms-appss://apps.apple.com/cn/app/id1092031003, NSErrorFailingURLKey=itms-appss://apps.apple.com/cn/app/id1092031003, NSLocalizedDescription=Redirection to URL with a scheme that is not HTTP(S)}
 }
 
 /**
@@ -324,11 +331,6 @@
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation {
     
     XYWKLog(@"%s", __FUNCTION__);
-    // 这里进行重定向了，例如 网页内下载APP 链接，起初是https://地址。重定向之后itms-appss:// 这里需要重新让WebView加载一下
-    NSString *redirectionUrlScheme = webView.URL.scheme;
-    if ([redirectionUrlScheme isEqualToString:@"itms-appss"]) {
-        [XYWKTool jumpToAppStoreFromVc:self withUrl:webView.URL];
-    }
 }
 
 /**
@@ -354,13 +356,21 @@
  */
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     
-    XYWKLog(@"URL: %@", navigationAction.request.URL.absoluteString);
+    // 0. about:blank 处理
+    if ([navigationAction.request.URL.absoluteString isEqualToString:@"about:blank"]) {
+        // 停止当前请求
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
+    }
+    if ([navigationAction.request.URL.scheme isEqualToString:@"file"]) {
+        // 停止当前请求
+        decisionHandler(WKNavigationActionPolicyAllow);
+        return;
+    }
     
-    NSString *urlStr = navigationAction.request.URL.absoluteString;
-    XYWKLog(@"urlStr.lastPathComponent = %@",urlStr.lastPathComponent);
-    
+    // 1.处理JS需要在新Tab页面加载页面
     if (!navigationAction.targetFrame.isMainFrame) {
-        
+
         NSString *jsStr = @"var a = document.getElementsByTagName('a');"
                             "for(var i=0;i<a.length;i++)"
                             "{a[i].setAttribute('target','');"
@@ -368,12 +378,115 @@
 
         // 执行JS代码，移除内部 <a/> 中的_blank属性，所有内容都在本页面打开
         [webView evaluateJavaScript:jsStr completionHandler:nil];
-
-        // 如果是这种情况下，直接加载一次最新的request即可
-        [webView loadRequest:navigationAction.request];
     }
     
-    // 这个回调必须调用<且只能调用一次>，无论位置是新页面的前或后
+    // 2. 处理基础Scheme加载过程，非HTTP(s)请求
+    NSString *scheme = navigationAction.request.URL.scheme;
+    BOOL HTTPScheme = [scheme isEqualToString:@"https"] || [scheme isEqualToString:@"http"];
+    if (!HTTPScheme) {
+        
+        // 非Http(s)Scheme,处理定向Scheme-即各类客户端
+        // 2.1 确定Scheme是否可以识别
+        BOOL bSucc = [[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL];
+        if (!bSucc) {
+            // 不可识别的，提示未安装客户端
+            [XYWKTool openURLFromVc:self withUrl:navigationAction.request.URL];
+            // 禁止通过,当前请求
+            decisionHandler(WKNavigationActionPolicyAllow);
+        }
+        else
+        {
+            // 可识别的单独处理一下微信支付宝
+            // 2.2 可以识别的Scheme 定向处理微信/支付宝/公有Scheme如tel: mail: sms:
+            // 2.2.1 定向处理微信 -> H5微信支付，单独处理
+            NSString *newUrl = navigationAction.request.URL.absoluteString;
+            if (self.wx_Referer) { // 只有在赋值之后默认检查微信H5支付
+                if([newUrl isEqualToString:self.wx_Referer]){
+                    
+                    // 加载微信的重定向地址
+                    if (self.wx_redirect_url) {
+                        
+                        self.wx_redirect_url = [self.wx_redirect_url stringByRemovingPercentEncoding];
+                        
+                        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[self.wx_redirect_url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
+                        [self.webView loadRequest:request];
+                        self.wx_redirect_url = nil;
+                    }
+                }
+            }
+            
+            // 2.2.2 针对支付宝处理
+            if (self.zfb_AppUrlScheme) {// 只有赋值后检查支付宝H5支付
+                if ([navigationAction.request.URL.scheme isEqualToString:@"alipay"]) {
+                    
+                    // 处理支付宝回调[url stringByReplacingOccurrencesOfString:@"%22alipays%22" withString:@"%22testmobilepay%22"]
+                    NSString *alipayUrl = [navigationAction.request.URL.absoluteString stringByRemovingPercentEncoding];
+                    NSString *zfbScheme = [NSString stringWithFormat:@"\"%@\"",self.zfb_AppUrlScheme];
+                    if (![alipayUrl containsString:zfbScheme]) {
+                        // 没有替换，手动替换
+                        alipayUrl = [alipayUrl stringByReplacingOccurrencesOfString:@"alipays" withString:self.zfb_AppUrlScheme];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                                
+                            NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[alipayUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
+                            [self.webView loadRequest:request];
+                        });
+                    }
+                }
+            }
+            
+            
+            // 打开URL
+            [XYWKTool openURLFromVc:self withUrl:navigationAction.request.URL];
+            // 允许通过,当前请求
+            decisionHandler(WKNavigationActionPolicyAllow);
+        }
+        
+        
+        return;
+    }
+    
+    
+    // 3.处理HTTP(s)请求,主要处理微信H5支付中间页面
+    if (self.wx_Referer) {// 即用户设置了微信支付
+        NSString *newUrl = navigationAction.request.URL.absoluteString;
+        NSString *referer = [NSString stringWithFormat:@"%@",self.wx_Referer];
+        if ([newUrl rangeOfString:@"https://wx.tenpay.com"].location != NSNotFound) {
+            
+            // 拿到最后一个参数，即&redirect_url=xxx
+            NSArray <NSString *>*paramsArray = [newUrl componentsSeparatedByString:@"="];
+            NSString *backUrl = [paramsArray.lastObject stringByRemovingPercentEncoding];
+            if ([backUrl isEqualToString:referer]) {
+                
+                // 通过，不做处理
+                decisionHandler(WKNavigationActionPolicyAllow);
+                return;
+            }else{
+                
+                self.wx_redirect_url = backUrl;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSRange range = [newUrl rangeOfString:@"redirect_url="];
+                    NSString *reqUrl;
+                    if (range.length>0) {
+                        reqUrl = [newUrl substringToIndex:range.location+range.length];
+                        reqUrl = [reqUrl stringByAppendingString:referer];
+                    }else{
+                        reqUrl = [newUrl stringByAppendingString:[NSString stringWithFormat:@"&redirect_url=%@",referer]];
+                    }
+                    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:reqUrl] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
+                    //设置授权域名
+                    [request setValue:referer forHTTPHeaderField:@"Referer"];
+                    [self.webView loadRequest:request];
+                });
+                
+                // 取消本次请求
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
+            }
+        }
+    }
+    
+    
+    // 默认允许所有请求
     decisionHandler(WKNavigationActionPolicyAllow);
 }
 

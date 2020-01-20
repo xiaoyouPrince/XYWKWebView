@@ -76,11 +76,17 @@ class WebViewController: XYWKWebViewController {
                     </div>
                     """
         self.webView.loadLocalHTML("main", withAddingStyleJS: styleJS, funcJS: funcJS, footerJS: footerJS)
+//        self.webView.backgroundColor = UIColor.red
         
         /// 设置导航
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "返回", style: .plain, target: self, action: #selector(backAction));
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "调用JS", style: .plain, target: self, action: #selector(callJS));
     }
+    
+    
+    
+    
+    
 }
 
 

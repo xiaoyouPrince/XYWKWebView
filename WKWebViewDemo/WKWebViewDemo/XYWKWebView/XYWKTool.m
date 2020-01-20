@@ -77,16 +77,35 @@ static XYWKTool *_tool;
 }
 
 
-/*
-在中午做了一个很饿很饿的梦，把我都特么吓哭了
- 
- 1.我又回到到了大学时代，似乎这次我是一个混子
- 2.大学是在天津某个村子，额那个诡异的村子似乎本身就在一股巨大的氤氲和魔咒李出不来
- 3.平添了很多的仇家，似乎动不动就会招来杀身之祸
- 4.这次的我好像更爱学习了，在学校教室的午休中居然梦到被第一节上课的老师吵醒。上一届的学生居然所有的用品都完整的摆在了书桌上，什么都不用准备居然就都全了，兴奋的我居然要做梦中发朋友圈了，因为我上过这么多年学，居然没有几个像样的笔都，想想都惭愧，但是也因为眼前准备好的一切而兴奋，在梦中都能感觉到那种：老子几年之后居然又回来上学了，开心。
- 5.学校所在额地方不知道有什么魔咒一般，似乎自己出门分分钟都会迷路和失踪一般。颇像黄老邪的桃花岛,邪性十足，十分恐怖
- 
-*/
++ (void)openURLFromVc:(UIViewController *)fromVc withUrl:(NSURL *)url
+{
+    // 处理是否是去AppStore
+    // 这里进行重定向了，例如 网页内下载APP 链接，起初是https://地址。重定向之后itms-appss:// 这里需要重新让WebView加载一下
+    NSString *redirectionUrlScheme = url.scheme;
+    if ([redirectionUrlScheme isEqualToString:@"itms-appss"]) {
+        [XYWKTool jumpToAppStoreFromVc:fromVc withUrl:url];
+        return;
+    }
+    
+    // 处理手机上内部App
+    BOOL success = [[UIApplication sharedApplication] canOpenURL:url];
+    if (success) {
+        // 打开App
+        if (__builtin_available(iOS 10.0, *)) {
+            [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+        } else {
+            [[UIApplication sharedApplication] openURL:url];
+        }
+    }else
+    {
+        // 设置弹窗
+        NSString *string = [NSString stringWithFormat:@"无法打开%@，因为 iOS 无法识别以\"%@\"开头的互联网地址",url,url.scheme];
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"温馨提示" message:string preferredStyle:UIAlertControllerStyleAlert];
+        // 确定按键不带点击事件
+        [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        [fromVc presentViewController:alertController animated:YES completion:nil];
+    }
+}
 
 
 @end

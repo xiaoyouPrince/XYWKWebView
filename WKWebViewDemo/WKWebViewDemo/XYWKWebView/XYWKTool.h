@@ -19,4 +19,7 @@
 + (void)jumpToAppStoreFromVc:(UIViewController *)fromVc withUrl:(NSURL *)url;
 + (void)jumpToAppStoreFromVc:(UIViewController *)fromVc withAppID:(NSString *)appID;
 
+/// 打开对应App的URL
++ (void)openURLFromVc:(UIViewController *)fromVc withUrl:(NSURL *)url;
+
 @end

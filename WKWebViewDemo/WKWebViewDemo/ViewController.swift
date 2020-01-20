@@ -53,6 +53,28 @@ class ViewController: UIViewController , WKUIDelegate{
         let nav = UINavigationController(rootViewController: webVC)
         self .present(nav, animated: true, completion: nil)
         
+//        let config = WKWebViewConfiguration()
+//        let webView = WKWebView(frame: CGRect(x: 0, y: 84, width: UIScreen.main.bounds.size.width, height: 300), configuration:config)
+//        self.view.addSubview(webView)
+//
+//        let path = Bundle.main.path(forResource: "main", ofType: "html")
+//        let url = URL(string: path!)
+//
+//        do {
+//            let str = try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
+//            print("content is: \(str)")
+//            webView.loadHTMLString(str, baseURL: nil)
+//        }
+//        catch {
+//            print("file read failed!")
+//        }
+
+        
+        
+        
+        
+        
+        
     }
 }
 

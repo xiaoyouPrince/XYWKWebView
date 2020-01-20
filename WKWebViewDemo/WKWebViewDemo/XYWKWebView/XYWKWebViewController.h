@@ -56,4 +56,19 @@
  */
 @property (nonatomic, assign) BOOL useWebNavigationBar;
 
+#pragma mark - 微信 & 支付宝 H5支付
+
+/**
+ * 微信H5支付的 Referer -- 即完成回跳 App 的 Scheme
+ * @note 这个参数必须为申请微信支付的”授权安全域名“
+ * @note 在 Info.plist 中必须设置相同的 App 回调 URL Scheme
+ */
+@property (nonatomic, copy) NSString * wx_Referer;
+
+/**
+ * 支付宝H5支付的 AppUrlScheme -- 即完成回跳 App 的 Scheme
+ * @note 在 Info.plist 中必须设置相同的 App 回调 URL Scheme
+ */
+@property (nonatomic, copy) NSString * zfb_AppUrlScheme;
+
 @end
