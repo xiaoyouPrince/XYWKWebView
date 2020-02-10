@@ -24,7 +24,6 @@
 @end
 
 @implementation XYWKWebViewController
-@synthesize webViewAppName=_webViewAppName;
 
 #pragma mark - Life Circle
 
@@ -126,7 +125,13 @@
 - (UIProgressView *)progressView
 {
     if (_progressView == nil) {
-        CGRect frame = CGRectMake(0, XYWKNavHeight, XYWKScreenW, 5);
+        
+        CGFloat progressViewY = XYWKNavHeight;
+        if (self.useWebNavigationBar) {
+            progressViewY = [UIApplication sharedApplication].statusBarFrame.size.height;
+        }
+        
+        CGRect frame = CGRectMake(0, progressViewY, XYWKScreenW, 5);
         _progressView = [[UIProgressView alloc] initWithFrame:frame];
     }
     return _progressView;
@@ -378,6 +383,10 @@
 
         // 执行JS代码，移除内部 <a/> 中的_blank属性，所有内容都在本页面打开
         [webView evaluateJavaScript:jsStr completionHandler:nil];
+        // 如果是这种情况下，直接加载一次最新的request即可
+        [webView loadRequest:navigationAction.request];
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
     
     // 2. 处理基础Scheme加载过程，非HTTP(s)请求
@@ -392,7 +401,8 @@
             // 不可识别的，提示未安装客户端
             [XYWKTool openURLFromVc:self withUrl:navigationAction.request.URL];
             // 禁止通过,当前请求
-            decisionHandler(WKNavigationActionPolicyAllow);
+            decisionHandler(WKNavigationActionPolicyCancel);
+            return;
         }
         else
         {
@@ -401,7 +411,8 @@
             // 2.2.1 定向处理微信 -> H5微信支付，单独处理
             NSString *newUrl = navigationAction.request.URL.absoluteString;
             if (self.wx_Referer) { // 只有在赋值之后默认检查微信H5支付
-                if([newUrl isEqualToString:self.wx_Referer]){
+                NSString *referer = [NSString stringWithFormat:@"%@://",self.wx_Referer];
+                if([newUrl isEqualToString:referer]){
                     
                     // 加载微信的重定向地址
                     if (self.wx_redirect_url) {
@@ -430,6 +441,10 @@
                             NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[alipayUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
                             [self.webView loadRequest:request];
                         });
+                        
+                        // 禁止通过此次请求
+                        decisionHandler(WKNavigationActionPolicyCancel);
+                        return;
                     }
                 }
             }
@@ -442,14 +457,13 @@
         }
         
         
-        return;
+//        return;
     }
-    
-    
-    // 3.处理HTTP(s)请求,主要处理微信H5支付中间页面
-    if (self.wx_Referer) {// 即用户设置了微信支付
+    else // if (self.wx_Referer)
+     // 3.处理HTTP(s)请求,主要处理微信H5支付中间页面
+    {// 即用户设置了微信支付
         NSString *newUrl = navigationAction.request.URL.absoluteString;
-        NSString *referer = [NSString stringWithFormat:@"%@",self.wx_Referer];
+        NSString *referer = [NSString stringWithFormat:@"%@://",self.wx_Referer];
         if ([newUrl rangeOfString:@"https://wx.tenpay.com"].location != NSNotFound) {
             
             // 拿到最后一个参数，即&redirect_url=xxx
@@ -483,11 +497,10 @@
                 return;
             }
         }
+        
+        // 默认允许所有请求
+        decisionHandler(WKNavigationActionPolicyAllow);
     }
-    
-    
-    // 默认允许所有请求
-    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
 
