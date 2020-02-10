@@ -3,7 +3,7 @@
 ### 更新
 
 #### Version 2.0 2020.02.10
-集成微信/支付宝 H5 支付功能。文档见 [iOS App接入H5支付](iOS App 接入H5 支付.md)
+集成微信/支付宝 H5 支付功能。文档见 [iOS App接入H5支付](https://github.com/xiaoyouPrince/WKWebViewDemo/blob/master/iOS%20App%20%E6%8E%A5%E5%85%A5H5%20%E6%94%AF%E4%BB%98.md)
 #### Version 1.0 2018.07.03 
 WKWebView 基本封装，包含本文档中功能
 
