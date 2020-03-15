@@ -113,6 +113,9 @@
     if (self.isUseWebPageTitle) {
         [self.webView removeObserver:self forKeyPath:@"title"];
     }
+    
+    // 移除选择过的本地图片
+    [XYWKTool removeTempImages];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -264,7 +267,53 @@
             [self.navigationController pushViewController:webViewController animated:YES];
         }
     }
+    //打开相册[目前只支持选择一张]
+    else if ([message.method isEqualToString:@"callNativeImage"]) {
+        
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"选择获取图片途径" preferredStyle:UIAlertControllerStyleActionSheet];
+        
+        // 默认相机，相册两个途径获取图片
+        NSArray <NSString *>*src = message.params[@"source"];
+        if (!src) {
+            src = @[@"ablum",@"camera"];
+        }
+        if ([src containsObject:@"ablum"]) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"从相册选择" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                
+                [XYWKTool chooseImageFromVC:self sourceType:UIImagePickerControllerSourceTypePhotoLibrary callBackMethod:message.callback];
+            }]];
+        }
+        if ([src containsObject:@"camera"]) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"从相机选择" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                
+                if ([self isSimuLator]) {
+                    
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"当前设备不支持相机设备" preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:@"知道了" style:UIAlertActionStyleDefault handler:nil]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                    
+                }else
+                {
+                    [XYWKTool chooseImageFromVC:self sourceType:UIImagePickerControllerSourceTypeCamera callBackMethod:message.callback];
+                }
+                
+            }]];
+        }
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
+
+-(BOOL)isSimuLator
+{
+    if (TARGET_IPHONE_SIMULATOR == 1 && TARGET_OS_IPHONE == 1) {
+        //模拟器
+        return YES;
+    }else{
+        //真机
+        return NO;
+    }
+}
+
 
 
 #pragma mark - WKNavigationDelegate

@@ -22,4 +22,8 @@
 /// 打开对应App的URL
 + (void)openURLFromVc:(UIViewController *)fromVc withUrl:(NSURL *)url;
 
+/// 选择图片相关
++ (void)chooseImageFromVC:(UIViewController *)fromVc sourceType:(UIImagePickerControllerSourceType)type callBackMethod:(NSString *)callback;
++ (void)removeTempImages;
+
 @end

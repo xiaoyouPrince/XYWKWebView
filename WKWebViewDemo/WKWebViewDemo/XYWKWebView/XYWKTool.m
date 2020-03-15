@@ -11,12 +11,27 @@
 
 #import "XYWKTool.h"
 #import <StoreKit/StoreKit.h>
+#import "XYWKWebViewController.h"
 
-@interface XYWKTool()<SKStoreProductViewControllerDelegate>
+@interface XYWKTool()<SKStoreProductViewControllerDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+/** 本地临时图片地址数组 */
+@property (nonatomic, strong)       NSMutableArray * tempImagePathArray;
 
 @end
 @implementation XYWKTool
+static XYWKWebViewController * _webVC;
+static NSString * _webViewCallBackMethod;
 static XYWKTool *_tool;
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.tempImagePathArray = @[].mutableCopy;
+    }
+    return self;
+}
+
 + (void)jumpToAppStoreFromVc:(UIViewController *)fromVc withUrl:(NSURL *)url
 {
     // 通常App Store的scheme形式为 itms-appss://itunes.apple.com/cn/app/id382201985?mt=8
@@ -107,5 +122,49 @@ static XYWKTool *_tool;
     }
 }
 
+
++ (void)chooseImageFromVC:(UIViewController *)fromVc sourceType:(UIImagePickerControllerSourceType)type callBackMethod:(NSString *)callback
+{
+    if ([fromVc isKindOfClass:XYWKWebViewController.class]) {
+        _webVC = (XYWKWebViewController *)fromVc;
+        _webViewCallBackMethod = callback;
+    }
+    
+    // 进行弹出相册
+    UIImagePickerController *vc = [[UIImagePickerController alloc] init];
+    _tool = _tool ?: [self new];
+    vc.delegate = _tool;
+    vc.sourceType = type;
+    
+    [_webVC presentViewController:vc animated:YES completion:nil];
+    
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
+
+    UIImage *image = [info  objectForKey:UIImagePickerControllerOriginalImage];
+    
+    NSInteger randNUM = arc4random()%100;
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:[NSString stringWithFormat:@"%ld.png",(randNUM)]];   // 保存
+    [self.tempImagePathArray addObject:filePath];
+    [UIImagePNGRepresentation(image) writeToFile: filePath atomically:YES];
+    
+    [picker dismissViewControllerAnimated:YES completion:^{
+        [_webVC.webView callJS:[NSString stringWithFormat:@"%@('%@')", _webViewCallBackMethod, filePath]];
+    }];
+}
+
+
++ (void)removeTempImages
+{
+    if (_tool.tempImagePathArray.count) {
+        for (NSString *path in _tool.tempImagePathArray) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+                [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
+            }
+        }
+    }
+}
 
 @end

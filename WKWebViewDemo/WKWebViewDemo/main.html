@@ -14,9 +14,30 @@
         <meta HTTP-EQUIV="expires" CONTENT="0">
         <title>Webview页面标题</title>
         <style type="text/css">
+            <p id="div1">
+                <img id="img1" src="PoweredByMacOSX.gif" height="200" width="200" />
+            </p>
         </style>
         
         <script type="text/javascript">
+            
+            // 得到图片 - private 方法
+            function getImg(url) {
+
+                var oDiv = document.getElementById("div1");
+                var oImg = document.getElementById("img1");
+
+                oImg.src = url;
+
+                // alert('得到了图片')
+
+                let para = document.createElement('p');
+                para.textContent = '你点击了这个按钮！';
+                document.body.appendChild(para);
+
+            }
+            
+            
             function call(text) {
                 var message = {
                     'method' : 'hello',
@@ -29,6 +50,16 @@
                 window.webkit.messageHandlers.webViewApp.postMessage(message);
 
                 alert("Hello xiayou");
+            }
+            function callImage(text) {
+                var message = {
+                    'method' : 'callNativeImage',
+                    'params' : {
+                        'source': [text]
+                    },
+                    'callback': 'getImg'
+                };
+                window.webkit.messageHandlers.webViewApp.postMessage(message);
             }
         
             function callback(text) {
@@ -72,5 +103,13 @@
         <a href="http://www.w3school.com.cn" target="_blank" > 测试新页面打开 W3School</a><br /><br /><br />
             
         <button onclick="prompt('请输入你的姓名!')">JS调OC-promp</button><br /><br /><br />
+        
+        <p id="div1">
+            <img id="img1" src="PoweredByMacOSX.gif" height="200" width="200" />
+        </p>
+        
+        <button onclick="callImage('ablum')">选择图片 - 相册</button><br /><br /><br />
+        <button onclick="callImage('camera')">选择图片 - 相机</button><br /><br /><br />
+        
     </body>
 </html>
