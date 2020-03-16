@@ -19,7 +19,7 @@
 
 @end
 @implementation XYWKTool
-static XYWKWebViewController * _webVC;
+static __weak XYWKWebViewController * _webVC;
 static NSString * _webViewCallBackMethod;
 static XYWKTool *_tool;
 
@@ -164,6 +164,7 @@ static XYWKTool *_tool;
                 [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
             }
         }
+        [_tool.tempImagePathArray removeAllObjects];
     }
 }
 
