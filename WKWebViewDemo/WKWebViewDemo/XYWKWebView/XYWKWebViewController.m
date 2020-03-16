@@ -17,8 +17,6 @@
 
 /** locationMgr */
 @property (nonatomic, strong)       CLLocationManager * locationMgr;
-/** location地理反编码 */
-@property (nonatomic, strong) CLGeocoder * locationGeocoder;
 
 @property(nonatomic , strong) UIView  *HUD;
 @property(nonatomic , strong) UIProgressView  *progressView;
@@ -313,7 +311,6 @@
         
         if (!self.locationMgr) {
             self.locationMgr = [CLLocationManager new];
-            self.locationGeocoder = [CLGeocoder new];
             self.locationMgr.delegate = self;
         }
         
