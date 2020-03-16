@@ -49,9 +49,15 @@ class ViewController: UIViewController , WKUIDelegate{
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         // 进入一个新的页面
-        let webVC = WebViewController()
+//        let webVC = WebViewController()
+//        let nav = UINavigationController(rootViewController: webVC)
+//        self .present(nav, animated: true, completion: nil)
+        
+        // 统一接入测试
+        let webVC = UnifiedAccessViewController()
+        webVC.url = "http://39.107.94.38:8005/h5/#/?code=9940A63EC6DC1F9685FD54955DF51C0DA39F7C0FFCD21C0C47046FCF92ADBEAF193A7B7E12EF6FE0FB8214BAE565D90B67623E9FD8C68FE73E8FE0BB1CEF02F765710F5911633F10CAC5BB3929B5598974C66C54ADE386A30957E6515E1582A6";
         let nav = UINavigationController(rootViewController: webVC)
-        self .present(nav, animated: true, completion: nil)
+        self.present(nav, animated: true, completion: nil)
         
 //        let config = WKWebViewConfiguration()
 //        let webView = WKWebView(frame: CGRect(x: 0, y: 84, width: UIScreen.main.bounds.size.width, height: 300), configuration:config)

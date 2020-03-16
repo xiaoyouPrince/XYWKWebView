@@ -36,6 +36,21 @@
                 document.body.appendChild(para);
 
             }
+        
+            // 处理获取定位回调
+            function onGetLocation(result) {
+
+                // 判断是否失败
+                let failReason = result.failReason
+                
+                if(failReason != null){
+                    alert(failReason);
+                }else
+                {
+                    alert(JSON.stringify(result))
+                }
+
+            }
             
             
             function call(text) {
@@ -59,6 +74,17 @@
                         sourceType: obj.sourceType, // 可以指定来源是相册还是相机，默认二者都有
                     },
                     'callback': 'onChooseImage'
+                };
+                window.webkit.messageHandlers.webViewApp.postMessage(message);
+            }
+        
+            function callImage(obj) {
+                var message = {
+                    'method' : 'getLocation',
+                    'params' : {
+                        type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                    },
+                    'callback': 'onGetLocation'
                 };
                 window.webkit.messageHandlers.webViewApp.postMessage(message);
             }
@@ -114,6 +140,8 @@
             sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
         })">选择图片 - 相册</button><br /><br /><br />
         <button onclick="callImage('camera')">选择图片 - 相机</button><br /><br /><br />
+        
+        <button onclick="callLocation('wgs84')">获取地理定位</button><br /><br /><br />
         
     </body>
 </html>

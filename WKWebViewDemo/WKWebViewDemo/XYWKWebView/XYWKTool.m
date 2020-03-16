@@ -149,9 +149,14 @@ static XYWKTool *_tool;
     NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:[NSString stringWithFormat:@"%ld.png",(randNUM)]];   // 保存
     [self.tempImagePathArray addObject:filePath];
     [UIImagePNGRepresentation(image) writeToFile: filePath atomically:YES];
+        
+    NSDictionary *dict = @{
+        @"localOriginalUri": filePath,
+        @"localCompressedUri": filePath,
+    };
     
     [picker dismissViewControllerAnimated:YES completion:^{
-        [_webVC.webView callJS:[NSString stringWithFormat:@"%@('%@')", _webViewCallBackMethod, filePath]];
+        [_webVC.webView callJS:[NSString stringWithFormat:@"%@(%@)", _webViewCallBackMethod, dict]];
     }];
 }
 

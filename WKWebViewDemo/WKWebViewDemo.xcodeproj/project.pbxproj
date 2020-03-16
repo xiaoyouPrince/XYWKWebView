@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B404749D241FB0B200A224A6 /* UnifiedAccessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B404749C241FB0B200A224A6 /* UnifiedAccessViewController.swift */; };
 		B427CB0E20E47FBB00DA20A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B427CB0720E47FBB00DA20A3 /* LaunchScreen.storyboard */; };
 		B427CB0F20E47FBB00DA20A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B427CB0820E47FBB00DA20A3 /* Main.storyboard */; };
 		B427CB1020E47FBB00DA20A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B427CB0920E47FBB00DA20A3 /* Assets.xcassets */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B404749C241FB0B200A224A6 /* UnifiedAccessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAccessViewController.swift; sourceTree = "<group>"; };
 		B427CB0520E47FBA00DA20A3 /* WKWebViewDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WKWebViewDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		B427CB0620E47FBB00DA20A3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B427CB0720E47FBB00DA20A3 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 			children = (
 				B427CB1320E4896400DA20A3 /* XYWKWebView */,
 				B427CB1D20E4BB6B00DA20A3 /* WebViewController.swift */,
+				B404749C241FB0B200A224A6 /* UnifiedAccessViewController.swift */,
 				B427CB0B20E47FBB00DA20A3 /* ViewController.swift */,
 				B427CB1F20E4ED2000DA20A3 /* main.html */,
 				B427CB0A20E47FBB00DA20A3 /* AppDelegate.swift */,
@@ -180,6 +183,7 @@
 				B427CB1C20E4B51000DA20A3 /* XYScriptMessage.m in Sources */,
 				B427CB1E20E4BB6B00DA20A3 /* WebViewController.swift in Sources */,
 				B427CB1920E489E000DA20A3 /* XYWKWebView.m in Sources */,
+				B404749D241FB0B200A224A6 /* UnifiedAccessViewController.swift in Sources */,
 				B427CB1620E489C800DA20A3 /* XYWKWebViewController.m in Sources */,
 				B427CB1220E47FBB00DA20A3 /* ViewController.swift in Sources */,
 				B427CB1120E47FBB00DA20A3 /* AppDelegate.swift in Sources */,
