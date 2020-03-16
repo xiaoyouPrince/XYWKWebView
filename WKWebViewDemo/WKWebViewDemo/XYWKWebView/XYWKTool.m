@@ -13,6 +13,19 @@
 #import <StoreKit/StoreKit.h>
 #import "XYWKWebViewController.h"
 
+@implementation NSDictionary (JSON)
+- (NSString *)jsonString
+{
+    NSMutableString *strM = [[NSMutableString alloc] initWithString:@"{\n"];
+    for (NSString *key in self.keyEnumerator) {
+        [strM appendFormat:@"%@: \"%@\",\n",key,self[key]];
+    }
+    [strM appendString:@"}"];
+    return strM;
+}
+
+@end
+
 @interface XYWKTool()<SKStoreProductViewControllerDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 /** 本地临时图片地址数组 */
 @property (nonatomic, strong)       NSMutableArray * tempImagePathArray;
@@ -122,6 +135,8 @@ static XYWKTool *_tool;
     }
 }
 
+#pragma mark - 相册相关
+
 
 + (void)chooseImageFromVC:(UIViewController *)fromVc sourceType:(UIImagePickerControllerSourceType)type callBackMethod:(NSString *)callback
 {
@@ -156,9 +171,10 @@ static XYWKTool *_tool;
     };
     
     [picker dismissViewControllerAnimated:YES completion:^{
-        [_webVC.webView callJS:[NSString stringWithFormat:@"%@(%@)", _webViewCallBackMethod, dict]];
+        [_webVC.webView callJS:[NSString stringWithFormat:@"%@(%@)", _webViewCallBackMethod,dict.jsonString]];
     }];
 }
+
 
 
 + (void)removeTempImages
@@ -173,4 +189,9 @@ static XYWKTool *_tool;
     }
 }
 
+
+#pragma mark - 地理位置相关
+
 @end
+
+

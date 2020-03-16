@@ -12,7 +12,9 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 
-
+@interface NSDictionary (JSON)
+- (NSString *)jsonString;
+@end
 @interface XYWKTool : NSObject
 
 /// 调转到App Store

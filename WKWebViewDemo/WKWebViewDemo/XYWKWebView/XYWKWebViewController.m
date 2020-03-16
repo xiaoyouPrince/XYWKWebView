@@ -10,8 +10,15 @@
 
 #import "XYWKWebViewController.h"
 #import "XYWKTool.h"
+// 定位相关
+#import <CoreLocation/CoreLocation.h>
 
-@interface XYWKWebViewController ()
+@interface XYWKWebViewController ()<CLLocationManagerDelegate>
+
+/** locationMgr */
+@property (nonatomic, strong)       CLLocationManager * locationMgr;
+/** location地理反编码 */
+@property (nonatomic, strong) CLGeocoder * locationGeocoder;
 
 @property(nonatomic , strong) UIView  *HUD;
 @property(nonatomic , strong) UIProgressView  *progressView;
@@ -300,6 +307,78 @@
             }]];
         }
         [self presentViewController:alert animated:YES completion:nil];
+    }
+    //获取用户地址
+    else if ([message.method isEqualToString:@"getLocation"]) {
+        
+        if (!self.locationMgr) {
+            self.locationMgr = [CLLocationManager new];
+            self.locationGeocoder = [CLGeocoder new];
+            self.locationMgr.delegate = self;
+        }
+        
+        // 查看获取类型参数// 默认wgs84。 也可以传gcj02获取火星坐标
+        NSString *type = message.params[@"type"];
+        // 发起一次定位
+        CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+        if (status == kCLAuthorizationStatusAuthorizedAlways || status == kCLAuthorizationStatusAuthorizedWhenInUse) {
+            
+            [self.locationMgr startUpdatingLocation];
+        }else if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted)
+        {
+            // 直接返回用失败
+            NSDictionary *dict = @{
+                @"failReason": @"用户拒绝使用位置权限"
+            };
+            [self.webView callJS:[NSString stringWithFormat:@"%@(%@)",message.callback,dict.jsonString]];
+        }else //if (status == kCLAuthorizationStatusNotDetermined)
+        {
+            // 请求用户授权
+            [self.locationMgr requestWhenInUseAuthorization];
+        }
+    }
+}
+
+#pragma mark -  请求地址位置和地理反编码
+// 一开始就请求地理位置
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
+{
+    // 拿到最近的location,去解析地理位置，并请求对应的天气
+    NSLog(@"请求到的地址为: - locations = %@",locations);
+    
+    // 解析第一个地址,用来请求位置
+    CLLocation *location = locations.firstObject;
+    // 返回用户的地理位置
+    NSDictionary *dict = @{
+        @"latitude": @(location.coordinate.latitude),
+        @"longitude": @(location.coordinate.longitude),
+        @"speed": @(location.speed),
+        @"accuracy": @(10)
+    };
+    [self.webView callJS:[NSString stringWithFormat:@"%@(%@)",@"onGetLocation",dict.jsonString]];
+    
+    [self.locationMgr stopUpdatingLocation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    // 请求地理位置失败，自动重新开始？直接返回信息等用户手动调用
+    NSDictionary *dict = @{
+        @"failReason": @"定位失败"
+    };
+    [self.webView callJS:[NSString stringWithFormat:@"%@(%@)",@"onGetLocation",dict.jsonString]];
+    
+    [self.locationMgr stopUpdatingLocation];
+}
+
+
+/// 监听用户已经在设置中修改
+/// @param manager manager description
+/// @param status status description
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    if (status == kCLAuthorizationStatusAuthorizedAlways || status == kCLAuthorizationStatusAuthorizedWhenInUse) {
+        [self.locationMgr startUpdatingLocation];
     }
 }
 

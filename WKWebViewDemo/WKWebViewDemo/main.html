@@ -22,12 +22,12 @@
         <script type="text/javascript">
             
             // 得到图片 - private 方法
-            function onChooseImage(url) {
+            function onChooseImage(obj) {
 
                 var oDiv = document.getElementById("div1");
                 var oImg = document.getElementById("img1");
 
-                oImg.src = url;
+                oImg.src = obj.localOriginalUri;
 
                 // alert('得到了图片')
 
@@ -78,7 +78,7 @@
                 window.webkit.messageHandlers.webViewApp.postMessage(message);
             }
         
-            function callImage(obj) {
+            function callLocation(obj) {
                 var message = {
                     'method' : 'getLocation',
                     'params' : {

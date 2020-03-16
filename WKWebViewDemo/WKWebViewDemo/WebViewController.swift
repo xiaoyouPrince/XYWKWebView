@@ -95,7 +95,7 @@ class WebViewController: XYWKWebViewController {
 extension WebViewController{
     
     @objc func backAction() {
-        self.dismiss(animated: true, completion: nil)
+        navigationController?.popViewController(animated: true)
     }
     
     @objc func callJS() {
