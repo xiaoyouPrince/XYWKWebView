@@ -22,7 +22,7 @@
         <script type="text/javascript">
             
             // 得到图片 - private 方法
-            function getImg(url) {
+            function onChooseImage(url) {
 
                 var oDiv = document.getElementById("div1");
                 var oImg = document.getElementById("img1");
@@ -51,13 +51,14 @@
 
                 alert("Hello xiayou");
             }
-            function callImage(text) {
+            function callImage(obj) {
                 var message = {
-                    'method' : 'callNativeImage',
+                    'method' : 'chooseImage',
                     'params' : {
-                        'source': [text]
+                        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+                        sourceType: obj.sourceType, // 可以指定来源是相册还是相机，默认二者都有
                     },
-                    'callback': 'getImg'
+                    'callback': 'onChooseImage'
                 };
                 window.webkit.messageHandlers.webViewApp.postMessage(message);
             }
@@ -108,7 +109,10 @@
             <img id="img1" src="PoweredByMacOSX.gif" height="200" width="200" />
         </p>
         
-        <button onclick="callImage('ablum')">选择图片 - 相册</button><br /><br /><br />
+        <button onclick="callImage({
+            sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+            sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+        })">选择图片 - 相册</button><br /><br /><br />
         <button onclick="callImage('camera')">选择图片 - 相机</button><br /><br /><br />
         
     </body>

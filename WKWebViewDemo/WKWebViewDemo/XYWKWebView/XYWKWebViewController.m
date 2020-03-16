@@ -268,16 +268,16 @@
         }
     }
     //打开相册[目前只支持选择一张]
-    else if ([message.method isEqualToString:@"callNativeImage"]) {
+    else if ([message.method isEqualToString:@"chooseImage"]) {
         
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"选择获取图片途径" preferredStyle:UIAlertControllerStyleActionSheet];
         
         // 默认相机，相册两个途径获取图片
-        NSArray <NSString *>*src = message.params[@"source"];
+        NSArray <NSString *>*src = message.params[@"sourceType"];
         if (!src) {
-            src = @[@"ablum",@"camera"];
+            src = @[@"album",@"camera"];
         }
-        if ([src containsObject:@"ablum"]) {
+        if ([src containsObject:@"album"]) {
             [alert addAction:[UIAlertAction actionWithTitle:@"从相册选择" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 
                 [XYWKTool chooseImageFromVC:self sourceType:UIImagePickerControllerSourceTypePhotoLibrary callBackMethod:message.callback];
