@@ -334,6 +334,65 @@
             [self.locationMgr requestWhenInUseAuthorization];
         }
     }
+    // 统一分享
+    else if ([message.method isEqualToString:@"updateAppMessageShareData"]) {
+        
+        // 弹框
+        //title: '', // 分享标题
+        //desc: '', // 分享描述
+        //link: '', // 分享链接，该链接域名或路径
+        //imgUrl: '', // 分享图标
+        //shareType
+        
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"选择获取图片途径" preferredStyle:UIAlertControllerStyleActionSheet];
+        
+        // 默认相机，相册两个途径获取图片
+        NSArray <NSString *>*src = message.params[@"shareType"];
+        if (!src || !src.count) {
+            src = @[@"1",@"2",@"3"];
+        }
+        if ([src containsObject:@"1"]) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"微信" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                
+                NSDictionary *dict = @{
+                    @"title": [message.params valueForKey:@"title"],
+                    @"desc": [message.params valueForKey:@"desc"],
+                    @"link": [message.params valueForKey:@"link"],
+                    @"imgUrl": [message.params valueForKey:@"imgUrl"]
+                };
+                [self.webView callJS:[NSString stringWithFormat:@"%@(%@)",message.callback,dict.jsonString]];
+                
+            }]];
+        }
+        if ([src containsObject:@"2"]) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"朋友圈" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                
+               NSDictionary *dict = @{
+                   @"title": [message.params valueForKey:@"title"],
+                   @"desc": [message.params valueForKey:@"desc"],
+                   @"link": [message.params valueForKey:@"link"],
+                   @"imgUrl": [message.params valueForKey:@"imgUrl"]
+               };
+               [self.webView callJS:[NSString stringWithFormat:@"%@(%@)",message.callback,dict.jsonString]];
+                
+            }]];
+        }
+        if ([src containsObject:@"3"]) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"分享链接" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                
+                
+               NSDictionary *dict = @{
+                   @"title": [message.params valueForKey:@"title"],
+                   @"desc": [message.params valueForKey:@"desc"],
+                   @"link": [message.params valueForKey:@"link"],
+                   @"imgUrl": [message.params valueForKey:@"imgUrl"]
+               };
+               [self.webView callJS:[NSString stringWithFormat:@"%@(%@)",message.callback,dict.jsonString]];
+                
+            }]];
+        }
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
 
 #pragma mark -  请求地址位置和地理反编码

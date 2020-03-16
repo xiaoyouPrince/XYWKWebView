@@ -51,6 +51,20 @@
                 }
 
             }
+        
+            // 处理用户统一分享
+            function onUpdateAppMessageShareData(result)
+            {
+                // 判断是否失败
+                let failReason = result.failReason
+                
+                if(failReason != null){
+                    alert(failReason);
+                }else
+                {
+                    alert(JSON.stringify(result))
+                }
+            }
             
             
             function call(text) {
@@ -85,6 +99,21 @@
                         type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
                     },
                     'callback': 'onGetLocation'
+                };
+                window.webkit.messageHandlers.webViewApp.postMessage(message);
+            }
+        
+            function callAppShare(obj) {
+                var message = {
+                    'method' : 'updateAppMessageShareData',
+                    'params' : {
+                        title: '测试标题', // 分享标题
+                        desc: '我是描述', // 分享描述
+                        link: 'xiaoyouprince.com', // 分享链接，该链接域名或路径
+                        imgUrl: 'xiaoyou', // 分享图标
+                        shareType:[]//分享的渠道  1:微信好友 2:朋友圈 3:复制链接分享 什么都不写或其它默认全部分享渠道
+                    },
+                    'callback': 'onUpdateAppMessageShareData'
                 };
                 window.webkit.messageHandlers.webViewApp.postMessage(message);
             }
@@ -142,6 +171,8 @@
         <button onclick="callImage('camera')">选择图片 - 相机</button><br /><br /><br />
         
         <button onclick="callLocation('wgs84')">获取地理定位</button><br /><br /><br />
+        
+        <button onclick="callAppShare('')">统一分享</button><br /><br /><br />
         
     </body>
 </html>
